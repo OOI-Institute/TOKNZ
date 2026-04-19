@@ -40,7 +40,7 @@ This repository is centered around a real multi-turn session:
 - Output: complete, structured, diagrammed proposal
 
 📄 See full demo:  
-→ [`docs/4_TURN_DEMO.md`](./docs/4_TURN_DEMO.md)
+→ [`docs/4_TURN_DEMO.md`](./docs/4_TURN_DEMO.PDF)
 
 ---
 
