@@ -9,7 +9,7 @@ TOKNZ is a pre-reasoning layer that stabilizes complex tasks before a model begi
 
 Instead of treating every prompt as a new problem, TOKNZ reconstructs the request as a **continuous system state** and governs how that state evolves across turns.
 
-> TOKNZ turns conversations from repeated reasoning into continuous state evolution.
+> TOKNZ turns conversations from repeated reasoning into continuous state evolution. At a high level - A bounded, structured state payload that replaces raw prompt input to reasoning systems.
 
 ---
 
@@ -104,6 +104,19 @@ This repository includes a real multi-turn session:
 
 ---
 
+## Failure Mode Without Pre-Reasoning
+
+In multi-turn systems, reasoning degrades over time:
+
+- context is repeatedly reconstructed instead of maintained
+- constraints drift or are inconsistently applied
+- outputs become longer, less precise, and more redundant
+- models spend tokens rediscovering structure instead of advancing it
+
+TOKNZ addresses this by stabilizing the system state before reasoning begins.
+
+---
+
 ## Efficiency Pattern
 
 TOKNZ does not optimize for shorter responses.
@@ -183,7 +196,7 @@ Minimal impact for:
 
 - `4_TURN_DEMO.pdf`  
 - `TOKNZ_Comparison.pdf`  
-
+- `HandOff_Example.md`
 ---
 
 ## One-Line Truth
