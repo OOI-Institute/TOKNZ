@@ -39,9 +39,6 @@ This repository is centered around a real multi-turn session:
 - Input: fragmented, evolving across turns
 - Output: complete, structured, diagrammed proposal
 
-📄 See full demo:  
-→ [/docs/4_TURN_DEMO.PDF)]
-
 ---
 
 ## What Happens Across Turns
