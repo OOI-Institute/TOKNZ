@@ -5,89 +5,102 @@
 
 ## Overview
 
-TOKNZ is a pre-reasoning layer that improves how language models handle complex, multi-turn tasks.
+TOKNZ is a pre-reasoning layer that stabilizes complex tasks before a model begins reasoning.
 
-Instead of treating every prompt as a new problem, TOKNZ stabilizes the task as a continuous system state. It reconstructs the problem space, preserves continuity across turns, and enables downstream reasoning to operate on a coherent, evolving structure.
+Instead of treating every prompt as a new problem, TOKNZ reconstructs the request as a **continuous system state** and governs how that state evolves across turns.
 
 > TOKNZ turns conversations from repeated reasoning into continuous state evolution.
 
 ---
 
+## Core Idea
+
+Modern language models are powerful—but inefficient in multi-turn workflows.
+
+Each turn:
+- reinterprets the problem  
+- rebuilds context  
+- re-explores reasoning paths  
+
+This leads to:
+- structural drift  
+- inconsistent outputs  
+- redundant tokens  
+- slow convergence  
+
+TOKNZ solves this by ensuring:
+
+> The problem is understood once—and then evolves.
+
+---
+
 ## What TOKNZ Does
 
-TOKNZ sits before the model.
+TOKNZ sits **before the model**.
 
-It:
-- reconstructs the active problem state
-- compresses relevant context
-- identifies constraints and relationships
-- prevents drift across turns
-- enables delta-based reasoning
+It does not generate answers.
 
-TOKNZ does not generate answers.
+It determines the **structure, constraints, and boundaries** of the problem space.
 
-It determines the structure and boundaries of the problem before reasoning begins.
+### At each turn, TOKNZ:
+
+- reconstructs the active problem state  
+- compresses only relevant context  
+- identifies constraints and dependencies  
+- maps relationships across domains  
+- prevents structural drift  
+- enables delta-based reasoning  
+
+---
+
+## System Flow
+User Input
+↓
+[TOKNZ Pre-Reasoning]
+state reconstruction
+context compression
+constraint mapping
+relationship modeling
+↓
+Language Model
+↓
+Structured Output
 
 ---
 
 ## Live Demo — 4 Turn System Build
 
-This repository is centered around a real multi-turn session:
+This repository includes a real multi-turn session:
 
-- Domain: Healthcare Quality Improvement
-- Task: Build a full QI proposal
-- Input: fragmented, evolving across turns
-- Output: complete, structured, diagrammed proposal
+- **Domain:** Healthcare Quality Improvement  
+- **Task:** Build a full QI proposal  
+- **Input:** fragmented, evolving across turns  
+- **Output:** structured, submission-ready proposal  
 
----
-
-## What Happens Across Turns
+### Turn Behavior
 
 | Turn | Input | System Behavior | Output |
 |------|------|----------------|--------|
-| 1 | Raw concept | Stabilizes structure | Clean proposal foundation |
-| 2 | Audience explanation | Preserves system framing | Clinician-facing explanation |
-| 3 | Workflow + outcomes | Extends system state | Operational clarity |
-| 4 | Final proposal | Assembles system | Full proposal + diagrams |
-
-### Key Observation
-
-- The system does not restart
-- Each turn builds on prior state
-- Output converges naturally
+| 1 | Raw concept | Builds full system state | Clean proposal foundation |
+| 2 | Audience explanation | Preserves structure | Clinician-facing explanation |
+| 3 | Workflow + outcomes | Extends system | Operational clarity |
+| 4 | Final assembly | Converges | Complete proposal |
 
 ---
 
-## Without vs With TOKNZ
+## Behavioral Difference
 
-### Without Pre-Reasoning
-- repeated reinterpretation
-- context rebuilt every turn
-- structural drift
-- inconsistent outputs
-- multiple revision cycles
+### Without TOKNZ
+- each turn is treated as a new problem  
+- context is rebuilt every turn  
+- outputs drift and repeat  
+- convergence requires multiple revisions  
 
 ### With TOKNZ
-- stable evolving system
-- no context rebuild
-- aligned outputs
-- faster convergence
-- usable outputs earlier
-
----
-
-## What This Demo Proves
-
-This repository demonstrates that:
-
-- multi-turn reasoning can behave like a continuous system
-- outputs can converge without rework loops
-- structure can persist across evolving inputs
-- complex artifacts can be built incrementally without drift
-
-The final output is not manually assembled.
-
-It emerges from stable reasoning across turns.
+- system state is constructed once  
+- each turn updates that state  
+- outputs remain aligned  
+- convergence happens naturally  
 
 ---
 
@@ -97,26 +110,82 @@ TOKNZ does not optimize for shorter responses.
 
 It optimizes for **total system efficiency**.
 
-- Turn 1: higher cost (state construction)
-- Turns 2–N: lower cost (delta updates only)
-- fewer clarification cycles
-- fewer revision loops
+### Cost Profile
 
-Typical savings for complex tasks:
-→ **30–50% reduction in total tokens**
+| Phase | Behavior |
+|------|---------|
+| Turn 1 | Higher cost (state construction) |
+| Turns 2–N | Lower cost (delta updates only) |
+
+### Typical Impact
+
+- 30–50% reduction in total tokens across multi-turn tasks  
+- fewer clarification cycles  
+- fewer revision loops  
+- higher first-pass usability  
 
 ---
 
-## System Architecture
+## Why It Works
 
-```text
-User Input
-   ↓
-[ TOKNZ Pre-Reasoning ]
-   - state reconstruction
-   - constraint mapping
-   - context compression
-   ↓
-Language Model
-   ↓
-Structured Output
+### 1. No Context Rebuild
+The system does not rediscover the problem every turn.
+
+### 2. Delta-Based Reasoning
+Each step answers:
+> “What changed?”
+
+instead of:
+> “What is the problem again?”
+
+### 3. Reduced Search Space
+Irrelevant reasoning paths are removed before inference.
+
+### 4. Fewer Revision Loops
+Better initial alignment reduces rework.
+
+---
+
+## What This Proves
+
+This repository demonstrates that:
+
+- multi-turn reasoning can behave like a continuous system  
+- structure can persist across evolving inputs  
+- outputs can converge without repeated reconstruction  
+- complex artifacts can be built incrementally without drift  
+
+The final output is not manually assembled.
+
+> It emerges from a stable reasoning process.
+
+---
+
+## Where TOKNZ Matters
+
+High-value scenarios:
+
+- multi-turn workflows  
+- document construction  
+- decision-sensitive systems  
+- multi-domain reasoning  
+- constraint-heavy problems  
+
+Minimal impact for:
+
+- single-turn queries  
+- simple factual questions  
+- low-context prompts  
+
+---
+
+## Included Docs
+
+- `4_TURN_DEMO.pdf`  
+- `TOKNZ_Comparison.pdf`  
+
+---
+
+## One-Line Truth
+
+> TOKNZ ensures reasoning starts inside the correct problem space—and stays there.
