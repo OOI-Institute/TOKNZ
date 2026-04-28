@@ -104,8 +104,7 @@ TOKNZ optimizes for **total system efficiency across turns**, not just shorter r
 
 ## Included in This Repository
 
-- [`HandOff_Example.md`](HandOff_Example.md) — Full public reference hand-off format
-- [`4_TURN_DEMO.pdf`](4_TURN_DEMO.pdf) — Real healthcare QI multi-turn build (fragmented input → submission-ready output)
+- [`toknz_insight.pdf`](toknz_insight) — System insight on long chain workflows
 - [`TOKNZ_Comparison.pdf`](TOKNZ_Comparison.pdf) — Side-by-side behavioral comparison
 
 ---
