@@ -107,5 +107,5 @@ TOKNZ optimizes for **total system efficiency across turns**, not just shorter r
 - [`toknz_insight.pdf`](toknz_insight) — System insight on long chain workflows
 - [`TOKNZ_Comparison.pdf`](TOKNZ_Comparison.pdf) — Side-by-side behavioral comparison
 - [`TOKNZ_Py_Demo`](TOKNZ_Py_Demo) — High-Level TOKNZ Python Demo
-- 
+- [`TOKNZ_5Turn_Demo.pdf`](TOKNZ_5Turn_Demo.pdf) — TOKNZ Use Over 5 Turns
  
