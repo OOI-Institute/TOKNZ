@@ -1,0 +1,234 @@
+Below is a Lightweight TOKNZ demo:
+
+```python
+"""
+TOKNZ Demo — IP-Safe Version
+
+Purpose:
+Show how TOKNZ-style pre-reasoning turns a multi-turn workflow from
+"rebuild context every turn" into "update an active task state."
+
+This demo is intentionally simplified:
+- no proprietary scoring
+- no private manifold math
+- no advanced projection logic
+- no hidden product internals
+"""
+
+from dataclasses import dataclass, field
+from typing import List, Dict, Optional
+import re
+
+
+# ----------------------------
+# Data Models
+# ----------------------------
+
+@dataclass
+class TaskState:
+    goal: str
+    domains: List[str] = field(default_factory=list)
+    constraints: List[str] = field(default_factory=list)
+    active_facts: List[str] = field(default_factory=list)
+    last_delta: Optional[str] = None
+
+
+@dataclass
+class ToknzPayload:
+    state_summary: str
+    delta: str
+    relevant_context: List[str]
+    constraints: List[str]
+    handoff_prompt: str
+
+
+# ----------------------------
+# TOKNZ Demo Engine
+# ----------------------------
+
+class ToknzDemoEngine:
+    def __init__(self):
+        self.state: Optional[TaskState] = None
+
+    def process_turn(self, user_input: str) -> ToknzPayload:
+        domains = self.detect_domains(user_input)
+        constraints = self.detect_constraints(user_input)
+        facts = self.extract_facts(user_input)
+
+        if self.state is None:
+            self.state = TaskState(
+                goal=self.detect_goal(user_input),
+                domains=domains,
+                constraints=constraints,
+                active_facts=facts,
+                last_delta="Initial state established."
+            )
+            delta = "Initial state established."
+        else:
+            delta = self.detect_delta(user_input, self.state.active_facts)
+            self.state.domains = sorted(set(self.state.domains + domains))
+            self.state.constraints = sorted(set(self.state.constraints + constraints))
+            self.state.active_facts = self.merge_relevant_facts(
+                self.state.active_facts,
+                facts
+            )
+            self.state.last_delta = delta
+
+        relevant_context = self.compress_context(self.state.active_facts)
+
+        handoff_prompt = self.build_handoff_prompt(
+            state=self.state,
+            delta=delta,
+            relevant_context=relevant_context
+        )
+
+        return ToknzPayload(
+            state_summary=self.summarize_state(self.state),
+            delta=delta,
+            relevant_context=relevant_context,
+            constraints=self.state.constraints,
+            handoff_prompt=handoff_prompt
+        )
+
+    # ----------------------------
+    # Simplified Public Logic
+    # ----------------------------
+
+    def detect_goal(self, text: str) -> str:
+        if "plan" in text.lower():
+            return "Create an operational plan."
+        if "risk" in text.lower():
+            return "Identify risks and stabilization actions."
+        return "Maintain coherent task state and support downstream reasoning."
+
+    def detect_domains(self, text: str) -> List[str]:
+        domain_keywords = {
+            "infrastructure": ["grid", "water", "diesel", "substation", "power"],
+            "healthcare": ["hospital", "patient", "er", "blood", "staff"],
+            "operations": ["plan", "monitor", "response", "schedule", "delivery"],
+            "compute": ["tokens", "model", "agent", "workflow", "api"],
+            "safety": ["risk", "safe", "stabilize", "failure", "constraint"],
+        }
+
+        found = []
+        lowered = text.lower()
+
+        for domain, keywords in domain_keywords.items():
+            if any(keyword in lowered for keyword in keywords):
+                found.append(domain)
+
+        return found or ["general"]
+
+    def detect_constraints(self, text: str) -> List[str]:
+        lowered = text.lower()
+        constraints = []
+
+        if "safe" in lowered or "risk" in lowered:
+            constraints.append("safety-sensitive")
+        if "no overcorrection" in lowered:
+            constraints.append("avoid overcorrection")
+        if "immediate" in lowered or "now" in lowered:
+            constraints.append("time-sensitive")
+        if "final" in lowered:
+            constraints.append("completion-oriented")
+
+        return constraints
+
+    def extract_facts(self, text: str) -> List[str]:
+        sentences = re.split(r"[.!?]\s+", text.strip())
+        return [s.strip() for s in sentences if len(s.strip()) > 8]
+
+    def detect_delta(self, text: str, prior_facts: List[str]) -> str:
+        lowered = text.lower()
+
+        if any(term in lowered for term in ["now", "just", "another", "still", "changed"]):
+            return f"Delta update detected: {text}"
+
+        return "Continuation turn detected; update existing state without full rebuild."
+
+    def merge_relevant_facts(
+        self,
+        existing: List[str],
+        new_facts: List[str],
+        max_facts: int = 8
+    ) -> List[str]:
+        merged = existing + new_facts
+
+        seen = set()
+        retained = []
+
+        for fact in merged:
+            key = fact.lower()
+            if key not in seen:
+                retained.append(fact)
+                seen.add(key)
+
+        return retained[-max_facts:]
+
+    def compress_context(self, facts: List[str], max_items: int = 5) -> List[str]:
+        return facts[-max_items:]
+
+    def summarize_state(self, state: TaskState) -> str:
+        return (
+            f"Goal: {state.goal}\n"
+            f"Domains: {', '.join(state.domains)}\n"
+            f"Constraints: {', '.join(state.constraints) or 'none'}\n"
+            f"Last Delta: {state.last_delta}"
+        )
+
+    def build_handoff_prompt(
+        self,
+        state: TaskState,
+        delta: str,
+        relevant_context: List[str]
+    ) -> str:
+        return f"""
+You are receiving a TOKNZ-style governed task handoff.
+
+Do not rebuild the whole problem from scratch.
+Use the active state and apply only the current delta.
+
+ACTIVE GOAL:
+{state.goal}
+
+DOMAINS:
+{", ".join(state.domains)}
+
+CONSTRAINTS:
+{", ".join(state.constraints) or "none"}
+
+CURRENT DELTA:
+{delta}
+
+RELEVANT CONTEXT:
+{chr(10).join("- " + item for item in relevant_context)}
+
+INSTRUCTION:
+Produce a focused response that continues the existing task state,
+preserves constraints, avoids unnecessary repetition, and moves toward completion.
+""".strip()
+
+
+# ----------------------------
+# Example Demo Run
+# ----------------------------
+
+if __name__ == "__main__":
+    engine = ToknzDemoEngine()
+
+    turns = [
+        "We have a cold snap stressing the electrical grid. Two substations are offline, warming centers are increasing demand, water pipes may burst, and diesel delivery is delayed. Identify risks and safe immediate actions with no overcorrection.",
+        "One substation just came back online, but load is still rising. What changes?",
+        "We are now seeing water pressure drops in two zones. What is likely happening?",
+        "Diesel delivery is delayed another six hours. What is our risk window now?",
+        "Give me a final six-hour stabilization plan."
+    ]
+
+    for i, turn in enumerate(turns, start=1):
+        payload = engine.process_turn(turn)
+
+        print("\n" + "=" * 60)
+        print(f"TOKNZ DEMO TURN {i}")
+        print("=" * 60)
+        print(payload.handoff_prompt)
+```
