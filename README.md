@@ -111,8 +111,4 @@ TOKNZ optimizes for **total system efficiency across turns**, not just shorter r
 
 ## One-Line Truth
 
-**TOKNZ ensures reasoning starts inside the correct problem space — and stays there.**
-
----
-
-*Ready to integrate TOKNZ into your workflows? See `HandOff_Example.md` to get started.*
+**TOKNZ ensures reasoning starts inside the correct problem space 
