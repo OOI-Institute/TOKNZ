@@ -106,9 +106,4 @@ TOKNZ optimizes for **total system efficiency across turns**, not just shorter r
 
 - [`toknz_insight.pdf`](toknz_insight) — System insight on long chain workflows
 - [`TOKNZ_Comparison.pdf`](TOKNZ_Comparison.pdf) — Side-by-side behavioral comparison
-
----
-
-## One-Line Truth
-
-**TOKNZ ensures reasoning starts inside the correct problem space 
+ 
