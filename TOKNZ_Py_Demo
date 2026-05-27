@@ -216,7 +216,7 @@ if __name__ == "__main__":
         "Give me a final six-hour stabilization plan.",
     ]
 
-    print("🚀 TOKNZ + Real LLM Demo — Continuous State Evolution\n")
+    print(" TOKNZ + Real LLM Demo — Continuous State Evolution\n")
 
     for i, turn in enumerate(turns, start=1):
         # 1. TOKNZ processes the turn
@@ -231,7 +231,7 @@ if __name__ == "__main__":
         print(f"\nDELTA: {payload.delta}\n")
 
         # 2. Call the real LLM with TOKNZ handoff prompt
-        print("🤖 LLM RESPONSE:")
+        print(" LLM RESPONSE:")
         response = llm.generate(payload.handoff_prompt, model="gpt-4o-mini")
         print(response)
         print("\n")
@@ -239,14 +239,14 @@ if __name__ == "__main__":
 ----
 
 
-How to Run
+How to Run:
 
-pip install openai
-export OPENAI_API_KEY=sk-...
-Run the script
+1 - pip install openai
+2 - export OPENAI_API_KEY=sk-...
+3 - Run the script
 
-Easy to Extend
+To Extend:
 
-Groq / Anthropic / Ollama: Just create a new class implementing LLMClient
-LangChain: Replace OpenAIClient with a LangChain ChatOpenAI or any other runnable
-Local models: Use llama-cpp-python, Ollama, or vLLM
+ - Groq / Anthropic / Ollama: Just create a new class implementing LLMClient
+ - LangChain: Replace OpenAIClient with a LangChain ChatOpenAI or any other runnable
+ - Local models: Use llama-cpp-python, Ollama, or vLLM
