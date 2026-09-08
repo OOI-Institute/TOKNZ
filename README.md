@@ -2,19 +2,36 @@
 
 **Semantic & Context Processing for Inference AI**
 
-TOKNZ is a model-agnostic semantic/context-processing system that converts raw or evolving information into a canonical semantic state before downstream inference.
+TOKNZ is a standalone, model-agnostic semantic/context-processing module for AI and ML systems.
 
-TOKNZ resolves **what the task means, what matters now, what changed, what persists, what conflicts, what is unknown, and what the inference system actually needs.**
+It converts raw or evolving input into a **canonical semantic state** and a **bounded inference packet** so downstream models, agents, applications, and pipelines can reason from resolved context instead of repeatedly reconstructing it from raw history.
 
-> Raw information does not go directly to inference. TOKNZ parses, partitions, aligns, reconstructs, normalizes, and compiles semantic state first.
+> TOKNZ makes context machine-ready before inference.
 
-## Core architecture
+## Core flow
 
 ```text
 CURRENT INPUT
 + PRIOR SEMANTIC STATE
 + OPTIONAL RETRIEVED / SYSTEM CONTEXT
         ↓
+      TOKNZ
+        ↓
+semantic parsing + alignment
+context reconstruction + continuity
+delta resolution + normalization
+relevance selection + inference compilation
+        ↓
+CANONICAL SEMANTIC STATE
+        ↓
+BOUNDED INFERENCE PACKET
+        ↓
+MODEL / AGENT / ML PIPELINE / APPLICATION
+```
+
+## What TOKNZ resolves
+
+```text
 TOKNZ
 ├─ objective resolution
 ├─ entity extraction
@@ -42,70 +59,13 @@ TOKNZ
 ├─ delta resolution
 ├─ semantic normalization
 └─ inference-context compilation
-        ↓
-CANONICAL SEMANTIC STATE
-        ↓
-BOUNDED INFERENCE PACKET
-        ↓
-MODEL / AGENT / ROBOT / WORKFLOW
 ```
-
-## PSA capability integration
-
-TOKNZ now contains the complete semantic parsing/alignment capability lineage previously treated as PSA. PSA is **not a separate runtime layer** in this repository.
-
-Those capabilities are implemented inside TOKNZ as:
-
-- semantic partitioning,
-- semantic alignment,
-- objective/goal extraction,
-- entity and alias resolution,
-- relationship and dependency mapping,
-- constraint/risk/permission extraction,
-- task and context boundary resolution,
-- evidence/relevance/uncertainty partitioning,
-- temporal/timeline partitioning,
-- artifact/execution/output intent resolution,
-- canonical semantic framing.
-
-TOKNZ then extends those capabilities with persistent semantic-state recall, active-context reconstruction, delta processing, state normalization, and bounded inference compilation.
-
-## What TOKNZ is
-
-TOKNZ is the semantic-state layer between information and inference.
-
-It can sit between memory/retrieval and inference, or operate directly on streaming and multi-turn input:
-
-```text
-Memory / Retrieval / Input
-          ↓
-        TOKNZ
-semantic + contextual resolution
-          ↓
-      Inference
-```
-
-Memory answers **what can be recalled**. TOKNZ answers **what the active information means together and what semantic/context state should be active now**.
-
-## What TOKNZ is not
-
-TOKNZ is not primarily:
-
-- a foundation model,
-- a chatbot,
-- a vector database,
-- a RAG replacement,
-- an agent framework,
-- a long-term memory store,
-- or a text compressor.
-
-Compression is a mechanism inside TOKNZ, not its defining category.
 
 ## Core objects
 
 ### `SemanticState`
 
-The canonical persistent representation includes:
+Persistent, structured representation of the active meaning:
 
 ```text
 objective
@@ -137,6 +97,8 @@ provenance
 
 ### `SemanticDelta`
 
+Explicit change relative to prior state:
+
 ```text
 added
 changed
@@ -148,7 +110,13 @@ unresolved
 
 ### `InferencePacket`
 
-The bounded packet handed to downstream inference contains the canonical state, current delta, selected active context, and a model-neutral inference contract.
+A bounded package for downstream inference containing:
+
+- canonical semantic state,
+- current semantic delta,
+- selected active context,
+- unresolved uncertainty/conflicts,
+- model-neutral handoff instructions.
 
 ## Minimal usage
 
@@ -156,50 +124,100 @@ The bounded packet handed to downstream inference contains the canonical state, 
 from toknz import ToknzEngine
 
 engine = ToknzEngine()
+
 packet = engine.process(
-    "Plan a safe six-hour stabilization response. Two substations are offline."
+    "Plan a six-hour stabilization response. Two substations are offline."
 )
 
 print(packet.state.objective)
-print(packet.state.risks)
+print(packet.state.entities)
 print(packet.delta.added)
 print(packet.context)
 ```
 
-Subsequent turns evolve the existing state rather than rebuilding it:
+State evolves across turns:
 
 ```python
-packet = engine.process("One substation is now back online, but load is still rising.")
+packet = engine.process(
+    "One substation is now back online, but load is still rising."
+)
 ```
 
-## Repository layout
+Retrieved or application context can be injected without changing the public contract:
+
+```python
+packet = engine.process(
+    "Assess the updated situation.",
+    retrieved_context=[
+        "Maintenance record: substation A failed last winter.",
+        "Policy: load shedding requires operator approval.",
+    ],
+)
+```
+
+## Installation
+
+```bash
+pip install -e .
+```
+
+Python 3.10+ is required.
+
+## MVP scope
+
+This repository intentionally contains only the standalone TOKNZ module:
 
 ```text
-src/toknz/       semantic/context runtime
+src/toknz/       runtime + public data model
 tests/           deterministic regression tests
-examples/        model-agnostic usage examples
-docs/            architecture and evaluation notes
-TOKNZ_Py_Demo    original lightweight model demo
-*.pdf            original demonstrations/research artifacts
+examples/        model-agnostic examples
+docs/            public architecture + evaluation docs
 ```
 
-The existing demo and PDFs remain preserved as the historical/minimal implementation baseline.
+TOKNZ does not require or expose any proprietary orchestration platform, private knowledge system, internal runtime, or company-specific architecture. It is designed to be independently embedded into AI/ML products.
 
-## Evaluation direction
+See [`docs/MVP_SCOPE.md`](docs/MVP_SCOPE.md) for the public product boundary.
 
-TOKNZ should be evaluated on semantic preservation, objective/constraint retention, alias and relationship resolution, delta accuracy, conflict/unknown preservation, context sufficiency, state drift, inference quality, and context/token efficiency.
+## What TOKNZ is not
 
-Large efficiency claims from earlier demonstrations remain historical repo baselines until reproduced under documented benchmark methodology.
+TOKNZ is not itself:
 
-## Legacy material
+- a foundation model,
+- a chatbot,
+- a vector database,
+- a RAG system,
+- an agent framework,
+- a long-term storage engine,
+- an authorization engine,
+- or an execution runtime.
 
-- `TOKNZ_Py_Demo` — original lightweight continuous-state demo
-- `TOKNZ_5Turn_Demo.pdf` — five-turn demonstration
-- `TOKNZ_Comparison.pdf` — behavioral comparison
-- `toknz_insight.pdf` — original system insight
+Those systems can integrate with TOKNZ through normal inputs and outputs.
 
-These artifacts are not removed or invalidated. They represent the first working expression of the same principle: **construct state once, then evolve it.**
+## Design goal
+
+Memory and retrieval answer **what information is available**.
+
+TOKNZ answers:
+
+> **What does the active information mean together, what changed, what still matters, and what should reach inference now?**
+
+## Evaluation
+
+TOKNZ should be evaluated on:
+
+- semantic preservation,
+- objective retention,
+- constraint retention,
+- entity/alias/relationship resolution,
+- delta accuracy,
+- context precision and sufficiency,
+- conflict/unknown preservation,
+- semantic drift,
+- downstream inference quality,
+- context/token efficiency.
+
+See [`docs/EVALUATION.md`](docs/EVALUATION.md).
 
 ## License
 
-See `LICENSE`.
+Apache-2.0. See `LICENSE`.

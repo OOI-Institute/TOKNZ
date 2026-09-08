@@ -1,8 +1,8 @@
 # TOKNZ Architecture
 
-TOKNZ is a semantic and context-processing system for inference AI.
+TOKNZ is a standalone semantic and context-processing module for inference AI.
 
-Its job is to transform raw/evolving information into a canonical semantic state before downstream inference.
+Its public boundary is intentionally narrow:
 
 ```text
 Sources / memory / retrieval / stream
@@ -11,6 +11,7 @@ Sources / memory / retrieval / stream
 semantic parsing + alignment
 context reconstruction + continuity
 delta resolution + normalization
+relevance selection + inference compilation
                 ↓
        Canonical Semantic State
                 ↓
@@ -24,22 +25,22 @@ delta resolution + normalization
 TOKNZ determines:
 
 - what the active information means,
-- which entities/concepts exist,
+- which entities and concepts exist,
 - which aliases resolve to the same identity,
-- how entities/concepts relate,
+- how entities and concepts relate,
 - what dependencies exist,
 - what objective is active,
 - which constraints and task boundaries apply,
-- which risks and permission/authority signals are present,
+- which risks and permission signals are present,
 - which domain/context is active,
 - whether the request implies artifact, execution, or informational output,
 - what is known, unknown, assumed, conflicting, or uncertain,
-- what evidence/time/relevance partitions matter,
+- what evidence, relevance, and temporal partitions matter,
 - what prior semantic state persists,
 - what changed since the prior state,
 - and which bounded state should reach inference.
 
-## Unified TOKNZ capability tree
+## Capability tree
 
 ```text
 TOKNZ
@@ -52,7 +53,7 @@ TOKNZ
 │  ├─ dependency identification
 │  ├─ constraint binding
 │  ├─ risk identification
-│  ├─ permission / authority-signal extraction
+│  ├─ permission-signal extraction
 │  ├─ task-boundary resolution
 │  ├─ domain/context resolution
 │  ├─ artifact intent
@@ -103,71 +104,61 @@ TOKNZ
    └─ bounded inference packet
 ```
 
-## PSA integration
-
-The semantic parsing/alignment capability set previously referred to as **PSA** is fully absorbed into TOKNZ.
-
-PSA is not a separate stage or runtime component here.
-
-Historically:
-
-```text
-PSA
-= parse, partition, align, and structure meaning
-
-TOKNZ
-= preserve, reconstruct, normalize, and update semantic context
-```
-
-The current architecture combines both responsibilities:
-
-```text
-Input
-  ↓
-TOKNZ
-semantic parsing + semantic alignment
-+ semantic-state continuity
-+ context reconstruction
-+ delta resolution
-+ inference compilation
-  ↓
-Inference
-```
-
 ## Design principles
 
-1. **Meaning before inference** — raw information is resolved into semantic state first.
-2. **Meaning before compression** — compression cannot discard objective, constraints, relationships, boundaries, uncertainty, or conflict.
-3. **State before replay** — prior state is reused rather than reconstructed every turn.
-4. **Delta before full history** — subsequent input updates semantic state explicitly.
-5. **Persistent state != active context** — TOKNZ may remember more than one inference call requires.
-6. **Unknowns remain unknown** — uncertainty is represented, not silently promoted to fact.
+1. **Meaning before inference** — raw input is resolved into semantic state first.
+2. **Meaning before compression** — context reduction must not discard objectives, constraints, relationships, boundaries, uncertainty, or conflict.
+3. **State continuity** — prior state is reused rather than rebuilt every turn.
+4. **Explicit deltas** — new input updates prior state through represented change.
+5. **Persistent state != active context** — TOKNZ may retain more state than a single inference call needs.
+6. **Unknowns remain unknown** — uncertainty is represented rather than silently promoted to fact.
 7. **Boundaries persist** — constraints, permissions, and scope survive context reduction.
-8. **Model-agnostic contract** — TOKNZ owns semantic state; downstream systems own inference/action.
-9. **Pluggable resolution** — deterministic, learned, LLM, embedding, or domain-specific resolvers can implement the same contract.
+8. **Model-agnostic contract** — TOKNZ owns semantic/context preparation; downstream systems own inference and action.
+9. **Pluggable resolution** — deterministic rules, learned models, LLMs, embeddings, or domain resolvers may implement extraction behind the same public contract.
 
 ## Baseline implementation
 
-`ToknzEngine` is a deterministic, dependency-free reference implementation. It is not presented as a frontier semantic parser. It exists to define a concrete runtime contract and testable behavior:
+`ToknzEngine` is a dependency-free reference implementation designed to establish the public API and testable MVP behavior:
 
 ```python
 text + prior SemanticState + optional retrieved_context
-    -> semantic parsing/alignment
+    -> semantic/context resolution
     -> SemanticState
     -> SemanticDelta
     -> InferencePacket
 ```
 
-Stronger semantic resolvers may replace individual extraction functions without changing the public data model.
+The baseline is intentionally replaceable. Production users can swap individual extraction/resolution functions with stronger learned components while preserving the public data model.
 
-## State ownership boundary
+## Public state boundary
 
-TOKNZ owns semantic/context state preparation. It does not inherently own long-term storage, source retrieval, downstream reasoning, tool execution, authorization decisions, or external action. Those systems can integrate through bounded inputs and outputs.
+TOKNZ owns:
 
-## Compatibility with original TOKNZ
+- semantic-state preparation,
+- semantic continuity,
+- objective and constraint continuity,
+- entity/relationship/dependency representation,
+- active vs persistent context separation,
+- delta representation,
+- unresolved-state preservation,
+- inference packet construction.
 
-The original `TOKNZ_Py_Demo` remains a valid lightweight predecessor. Its task state, delta handling, context compression, constraints, and handoff logic map directly into the expanded architecture.
+TOKNZ does not inherently own:
 
-The current architecture preserves the original principle:
+- long-term storage,
+- source retrieval,
+- proprietary knowledge bases,
+- planning/orchestration systems,
+- model reasoning,
+- tool execution,
+- authorization decisions,
+- external action,
+- or private runtime infrastructure.
+
+Those systems may integrate through bounded public inputs and outputs.
+
+## Standalone architecture rule
+
+The repository defines TOKNZ only. Public code and documentation must remain independent of any parent platform, private runtime, internal subsystem naming, or proprietary architecture lineage.
 
 > **Construct semantic state once, then evolve it.**
