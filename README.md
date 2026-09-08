@@ -1,111 +1,186 @@
 # TOKNZ
 
-**Pre-Reasoning Infrastructure for Multi-Turn Reasoning Systems**
+**Semantic & Context Processing for Inference AI**
 
----
+TOKNZ is a model-agnostic semantic/context-processing system that prepares bounded, decision-ready state for downstream inference.
 
-## Overview
+Instead of forcing every model, agent, robot, or workflow to reinterpret raw history from scratch, TOKNZ resolves the active semantic state: **what the task means, what matters now, what changed, what persists, what conflicts, and what the inference system actually needs.**
 
-**TOKNZ** is a pre-reasoning infrastructure layer for AI, robotics, enterprise systems, and ML workflows.
+> Raw information does not go directly to inference. TOKNZ resolves meaning and context first, then compiles a bounded inference packet.
 
-Instead of letting every model, agent, robot, or team repeatedly reinterpret the world from scratch, TOKNZ **reconstructs the active task as a stable system state**, compresses only relevant context, detects what changed, and hands the downstream model/robot/team a **bounded, decision-ready payload**.
+## Core flow
 
-**In simple terms:**  
-TOKNZ turns repeated reasoning into **continuous state evolution**.
+```text
+CURRENT INPUT
++ PRIOR SEMANTIC STATE
++ OPTIONAL RETRIEVED / SYSTEM CONTEXT
+        ↓
+SEMANTIC RESOLUTION
+entities · concepts · relationships · objectives
+constraints · assumptions · knowns · unknowns
+        ↓
+CONTEXT RESOLUTION
+active · persistent · superseded · conflicting · irrelevant
+        ↓
+DELTA RESOLUTION
+added · changed · removed · reaffirmed · unresolved
+        ↓
+SEMANTIC STATE
+        ↓
+INFERENCE PACKET COMPILER
+        ↓
+MODEL / AGENT / ROBOT / WORKFLOW
+```
 
-It sits before the reasoning engine and does one thing: it ensures the problem is understood **once** — and then evolves cleanly across every subsequent turn.
+## What TOKNZ is
 
----
+TOKNZ is a semantic/context layer for inference systems. It can sit between memory/retrieval and inference, or operate directly on streaming/multi-turn input.
 
-## Core Idea
+It is designed to:
 
-Modern language models are powerful — but inefficient in multi-turn workflows.
+- reconstruct persistent semantic state across turns,
+- preserve objectives and constraints,
+- track explicit state changes,
+- resolve relationships and dependencies,
+- separate persistent context from currently active context,
+- preserve conflicts and unknowns rather than silently flattening them,
+- reduce irrelevant context before inference,
+- compile model-neutral inference packets.
 
-Each new prompt forces the model to:
-- Reinterpret the problem from scratch
-- Rebuild context
-- Re-explore reasoning paths
+## What TOKNZ is not
 
-This creates **structural drift**, inconsistent outputs, redundant tokens, and slow convergence.
+TOKNZ is not primarily:
 
-**TOKNZ solves this** by turning conversations into continuous system evolution.  
-It replaces raw prompt history with a bounded, structured state payload that the downstream model reasons *inside* — eliminating drift while delivering materially better outcomes.
+- a foundation model,
+- a chatbot,
+- a vector database,
+- a RAG replacement,
+- an agent framework,
+- a long-term memory store,
+- or a text compressor.
 
----
+Compression remains useful, but it is a mechanism inside the broader semantic/context-processing system.
 
-## What TOKNZ Does
+## Minimal usage
 
-TOKNZ does **not** generate answers. It prepares the problem space.
+```python
+from toknz import ToknzEngine
 
-At every turn it:
-- Reconstructs the active system state
-- Compresses only what is relevant
-- Identifies constraints, dependencies, and relationships
-- Enables delta-based updates (“what changed?”)
-- Prevents structural drift
-- Hands the model a clean, decision-ready payload
+engine = ToknzEngine()
+packet = engine.process("Plan a safe six-hour stabilization response for the grid event.")
 
----
+print(packet.state.objective)
+print(packet.delta.added)
+print(packet.context)
+```
 
-## Efficiency Pattern
+Subsequent turns evolve the existing state rather than rebuilding it:
 
-TOKNZ optimizes for **total system efficiency across turns**, not just shorter responses.
+```python
+packet = engine.process("One substation is back online, but load is still rising.")
+```
 
-### Typical Impact (verified across simulations)
-- **30–50%** reduction in total tokens for standard multi-turn tasks (repo baseline)
-- **50–60%+** in complex, artifact-heavy workflows
-- **94–99.95%+** in long-horizon enterprise, robotics, and frontier-scale runs (200–5000+ turns)
+## Core objects
 
-### Real-World Scale Examples
+### `SemanticState`
 
-| Scenario                          | Scale                              | Savings                  | Daily / Per-Workflow Impact                  |
-|-----------------------------------|------------------------------------|--------------------------|----------------------------------------------|
-| Consumer-facing app               | 70M–175M prompts/day               | ~52%                     | $114k–$286k daily inference savings         |
-| Enterprise-consumer hybrid        | 20M–50M sessions + 1k–5k workflows | 81–88%                   | **$488k–$2.16M daily**                      |
-| Frontier R&D / ML / Robotics      | 5000-turn workflows                | 99.95%                   | $37,500 → **$20** per workflow              |
+The persistent internal representation of the active task/world meaning:
 
-### Cost Profile
-| Phase      | Behavior                              |
-|------------|---------------------------------------|
-| Turn 1     | Higher cost (full state construction) |
-| Turns 2–N  | Significantly lower (delta updates + bounded payload only) |
+```text
+objective
+entities
+concepts
+relationships
+constraints
+assumptions
+knowns
+unknowns
+conflicts
+active_context
+persistent_context
+provenance
+```
 
-**Additional gains** include fewer clarification cycles, fewer revision loops, and dramatically higher first-pass usability.
+### `SemanticDelta`
 
----
+What changed relative to the prior state:
 
-## Behavioral Difference
+```text
+added
+changed
+removed
+reaffirmed
+unresolved
+```
 
-| Aspect                  | Without TOKNZ                          | With TOKNZ                                      |
-|-------------------------|----------------------------------------|-------------------------------------------------|
-| Problem handling        | Treated as new each turn               | Constructed once, then evolved                  |
-| Context                 | Rebuilt every turn                     | Maintained as stable state                      |
-| Output behavior         | Drift, repetition, rework              | Aligned, consistent, natural convergence        |
-| Convergence             | Requires multiple revisions            | Happens naturally                               |
+### `InferencePacket`
 
----
+The bounded state handed to downstream inference:
 
-## Where TOKNZ Matters
+```text
+semantic state
+current delta
+selected context
+constraints
+unknowns/conflicts
+handoff instruction
+```
 
-**High-value scenarios**:
-- Long-running enterprise operations & multi-system workflows
-- Consumer-facing chat at massive scale
-- Robotics & embodied control loops
-- ML pipelines & iterative training
-- Frontier R&D and complex multi-domain reasoning
-- Decision-sensitive systems with strict constraints
+## Repository layout
 
-**Minimal impact for**:
-- Single-turn queries
-- Simple factual questions
-- Low-context prompts
+```text
+src/toknz/       semantic/context runtime
+tests/           deterministic regression tests
+examples/        model-agnostic usage examples
+docs/            architecture and evaluation notes
+TOKNZ_Py_Demo    original lightweight model demo
+*.pdf            original demonstrations/research artifacts
+```
 
----
+The original demo and PDFs remain part of the repository as the historical/minimal implementation baseline.
 
-## Included in This Repository
+## Relationship to memory and RAG
 
-- [`toknz_insight.pdf`](toknz_insight) — System insight on long chain workflows
-- [`TOKNZ_Comparison.pdf`](TOKNZ_Comparison.pdf) — Side-by-side behavioral comparison
-- [`TOKNZ_Py_Demo`](TOKNZ_Py_Demo) — High-Level TOKNZ Python Demo
-- [`TOKNZ_5Turn_Demo.pdf`](TOKNZ_5Turn_Demo.pdf) — TOKNZ Use Over 5 Turns
- 
+A useful separation is:
+
+```text
+Memory / Retrieval
+        ↓
+TOKNZ
+semantic + contextual resolution
+        ↓
+Inference
+```
+
+Memory answers **what can be recalled**. TOKNZ answers **what the active information means together and what should be active for this inference call**.
+
+## Evaluation direction
+
+TOKNZ should be evaluated on more than token count. Primary metrics include:
+
+- semantic preservation,
+- objective retention,
+- constraint retention,
+- delta accuracy,
+- conflict/unknown preservation,
+- context sufficiency,
+- state drift,
+- inference quality,
+- and token/context efficiency.
+
+Large efficiency claims from earlier demonstrations should be treated as historical repo baselines until reproduced under a documented benchmark methodology.
+
+## Legacy material
+
+The repository preserves the established work:
+
+- `TOKNZ_Py_Demo` — original lightweight continuous-state demo
+- `TOKNZ_5Turn_Demo.pdf` — five-turn demonstration
+- `TOKNZ_Comparison.pdf` — behavioral comparison
+- `toknz_insight.pdf` — original system insight
+
+These artifacts are not removed or invalidated by the semantic-context expansion. They represent the first working expression of the same core principle: **construct state once, then evolve it.**
+
+## License
+
+See `LICENSE`.
